@@ -18,7 +18,7 @@
 //! ```rust
 //! use std::sync::Arc;
 //! use std::thread;
-//! use instance_thread_local::ThreadLocal;
+//! use thread_local_object::ThreadLocal;
 //!
 //! let tls = Arc::new(ThreadLocal::new());
 //!
