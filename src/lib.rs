@@ -81,7 +81,7 @@ impl<T: 'static> ThreadLocal<T> {
     }
 }
 
-pub enum Entry<'a, T> {
+pub enum Entry<'a, T: 'static> {
     Occupied(OccupiedEntry<'a, T>),
     Vacant(VacantEntry<'a, T>),
 }
@@ -104,7 +104,8 @@ impl<'a, T: 'static> Entry<'a, T> {
     }
 }
 
-pub struct OccupiedEntry<'a, T>(hash_map::OccupiedEntry<'a, usize, Box<UnsafeAny>>, PhantomData<T>);
+pub struct OccupiedEntry<'a, T: 'static>(hash_map::OccupiedEntry<'a, usize, Box<UnsafeAny>>,
+                                         PhantomData<&'a mut T>);
 
 impl<'a, T: 'static> OccupiedEntry<'a, T> {
     pub fn get(&self) -> &T {
@@ -128,7 +129,8 @@ impl<'a, T: 'static> OccupiedEntry<'a, T> {
     }
 }
 
-pub struct VacantEntry<'a, T>(hash_map::VacantEntry<'a, usize, Box<UnsafeAny>>, PhantomData<T>);
+pub struct VacantEntry<'a, T: 'static>(hash_map::VacantEntry<'a, usize, Box<UnsafeAny>>,
+                                       PhantomData<&'a mut T>);
 
 impl<'a, T: 'static> VacantEntry<'a, T> {
     pub fn insert(self, value: T) -> &'a mut T {
