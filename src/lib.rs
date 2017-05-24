@@ -35,6 +35,8 @@
 //! assert_eq!(tls.get_cloned(), Some(1));
 //! ```
 #![warn(missing_docs)]
+#![doc(html_root_url="https://docs.rs/thread-local-object/0.1.0")]
+
 extern crate unsafe_any;
 
 use std::cell::RefCell;

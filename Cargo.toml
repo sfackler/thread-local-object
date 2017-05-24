@@ -2,6 +2,11 @@
 name = "thread-local-object"
 version = "0.1.0"
 authors = ["Steven Fackler <sfackler@gmail.com>"]
+description = "Per-object thread local storage"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/sfackler/thread-local-object"
+documentation = "https://docs.rs/thread-local-object/0.1.0/thread_local_object"
+readme = "README.md"
 
 [dependencies]
 unsafe-any = "0.4"
