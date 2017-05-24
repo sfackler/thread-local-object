@@ -158,6 +158,7 @@ impl<T: 'static> ThreadLocal<T> {
 impl<T> ThreadLocal<T>
     where T: 'static + Clone
 {
+    /// Returns a copy of the current thread's value.
     pub fn get_cloned(&self) -> Option<T> {
         VALUES.with(|v| {
                         v.borrow()
