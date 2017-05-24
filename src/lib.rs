@@ -88,6 +88,11 @@ impl<T: 'static> ThreadLocal<T> {
     }
 
     /// Sets this thread's value, returning the previous value if present.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from within the execution of a closure provided to another method on this
+    /// value.
     pub fn set(&self, value: T) -> Option<T> {
         self.entry(|e| match e {
                        Entry::Occupied(mut e) => Some(e.insert(value)),
@@ -99,6 +104,11 @@ impl<T: 'static> ThreadLocal<T> {
     }
 
     /// Removes this thread's value, returning it if it existed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from within the execution of a closure provided to another method on this
+    /// value.
     pub fn remove(&self) -> Option<T> {
         VALUES.with(|v| {
                         v.borrow_mut()
@@ -111,6 +121,11 @@ impl<T: 'static> ThreadLocal<T> {
     ///
     /// The closure is required for the same soundness reasons it is required for the standard
     /// library's `thread_local!` values.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from within the execution of a closure provided to another method on this
+    /// value.
     pub fn entry<F, R>(&self, f: F) -> R
         where F: FnOnce(Entry<T>) -> R
     {
@@ -128,6 +143,11 @@ impl<T: 'static> ThreadLocal<T> {
     ///
     /// The closure is required for the same soundness reasons it is required for the standard
     /// library's `thread_local!` values.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from within the execution of a closure passed to `entry` or `get_mut` on
+    /// this value.
     pub fn get<F, R>(&self, f: F) -> R
         where F: FnOnce(Option<&T>) -> R
     {
@@ -143,6 +163,11 @@ impl<T: 'static> ThreadLocal<T> {
     ///
     /// The closure is required for the same soundness reasons it is required for the standard
     /// library's `thread_local!` values.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from within the execution of a closure provided to another method on this
+    /// value.
     pub fn get_mut<F, R>(&self, f: F) -> R
         where F: FnOnce(Option<&mut T>) -> R
     {
@@ -159,6 +184,11 @@ impl<T> ThreadLocal<T>
     where T: 'static + Clone
 {
     /// Returns a copy of the current thread's value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called from within the execution of a closure passed to `entry` or `get_mut` on
+    /// this value.
     pub fn get_cloned(&self) -> Option<T> {
         VALUES.with(|v| {
                         v.borrow()
