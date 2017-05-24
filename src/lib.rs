@@ -35,12 +35,6 @@ pub struct ThreadLocal<T: 'static> {
     _p: PhantomData<T>,
 }
 
-impl<T: 'static> Drop for ThreadLocal<T> {
-    fn drop(&mut self) {
-        self.remove();
-    }
-}
-
 impl<T: 'static> ThreadLocal<T> {
     pub fn new() -> ThreadLocal<T> {
         ThreadLocal {
