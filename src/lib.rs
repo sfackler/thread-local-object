@@ -1,7 +1,7 @@
 //! Per-object thread local storage.
 //!
 //! The `ThreadLocal` type which stores a distinct (nullable) value of some type for each thread
-//! that accesses it.
+//! that accesses it. It's analogous for the `pthread_key_t` type in C.
 //!
 //! A thread's values are destroyed when it exits, but the values associated with a `ThreadLocal`
 //! instance are not destroyed when it is dropped. These are in some ways the opposite semantics of

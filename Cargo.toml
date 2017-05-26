@@ -7,6 +7,11 @@ license = "MIT/Apache-2.0"
 repository = "https://github.com/sfackler/thread-local-object"
 documentation = "https://docs.rs/thread-local-object/0.1.0/thread_local_object"
 readme = "README.md"
+categories = ["concurrency"]
+keywords = ["thread", "local"]
+
+[badges]
+travis-ci = { repository = "sfackler/thread-local-object" }
 
 [dependencies]
 unsafe-any = "0.4"
