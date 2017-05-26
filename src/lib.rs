@@ -41,6 +41,7 @@ extern crate unsafe_any;
 
 use std::cell::RefCell;
 use std::collections::hash_map::{self, HashMap};
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::sync::atomic::{AtomicUsize, ATOMIC_USIZE_INIT, Ordering};
@@ -73,6 +74,16 @@ fn next_id() -> usize {
 pub struct ThreadLocal<T: 'static> {
     id: usize,
     _p: PhantomData<T>,
+}
+
+impl<T: 'static + fmt::Debug> fmt::Debug for ThreadLocal<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.get(|v| {
+            fmt.debug_tuple("ThreadLocal")
+                .field(&v)
+                .finish()
+        })
+    }
 }
 
 impl<T: 'static> ThreadLocal<T> {
@@ -201,6 +212,7 @@ impl<T> ThreadLocal<T>
 }
 
 /// A view into a thread's slot in a `ThreadLocal` that may be empty.
+#[derive(Debug)]
 pub enum Entry<'a, T: 'static> {
     /// An occupied entry.
     Occupied(OccupiedEntry<'a, T>),
@@ -234,6 +246,14 @@ impl<'a, T: 'static> Entry<'a, T> {
 pub struct OccupiedEntry<'a, T: 'static>(hash_map::OccupiedEntry<'a, usize, Box<UnsafeAny>>,
                                          PhantomData<&'a mut T>);
 
+impl<'a, T: 'static + fmt::Debug> fmt::Debug for OccupiedEntry<'a, T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_tuple("OccupiedEntry")
+            .field(self.get())
+            .finish()
+    }
+}
+
 impl<'a, T: 'static> OccupiedEntry<'a, T> {
     /// Returns a reference to the value in the entry.
     pub fn get(&self) -> &T {
@@ -265,6 +285,12 @@ impl<'a, T: 'static> OccupiedEntry<'a, T> {
 /// A view into a thread's slot in a `ThreadLocal` which is unoccupied.
 pub struct VacantEntry<'a, T: 'static>(hash_map::VacantEntry<'a, usize, Box<UnsafeAny>>,
                                        PhantomData<&'a mut T>);
+
+impl<'a, T: 'static + fmt::Debug> fmt::Debug for VacantEntry<'a, T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_tuple("VacantEntry").finish()
+    }
+}
 
 impl<'a, T: 'static> VacantEntry<'a, T> {
     /// Sets the value of the entry, and returns a mutable reference to it.
