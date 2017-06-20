@@ -81,11 +81,7 @@ unsafe impl<T> Send for ThreadLocal<T> {}
 
 impl<T: 'static + fmt::Debug> fmt::Debug for ThreadLocal<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.get(|v| {
-            fmt.debug_tuple("ThreadLocal")
-                .field(&v)
-                .finish()
-        })
+        self.get(|v| fmt.debug_tuple("ThreadLocal").field(&v).finish())
     }
 }
 
@@ -111,12 +107,12 @@ impl<T: 'static> ThreadLocal<T> {
     /// value.
     pub fn set(&self, value: T) -> Option<T> {
         self.entry(|e| match e {
-                       Entry::Occupied(mut e) => Some(e.insert(value)),
-                       Entry::Vacant(e) => {
-                           e.insert(value);
-                           None
-                       }
-                   })
+            Entry::Occupied(mut e) => Some(e.insert(value)),
+            Entry::Vacant(e) => {
+                e.insert(value);
+                None
+            }
+        })
     }
 
     /// Removes this thread's value, returning it if it existed.
@@ -127,10 +123,10 @@ impl<T: 'static> ThreadLocal<T> {
     /// value.
     pub fn remove(&self) -> Option<T> {
         VALUES.with(|v| {
-                        v.borrow_mut()
-                            .remove(&self.id)
-                            .map(|v| unsafe { *v.downcast_unchecked::<T>() })
-                    })
+            v.borrow_mut().remove(&self.id).map(|v| unsafe {
+                *v.downcast_unchecked::<T>()
+            })
+        })
     }
 
     /// Passes a handle to the current thread's value to a closure for in-place manipulation.
@@ -143,7 +139,8 @@ impl<T: 'static> ThreadLocal<T> {
     /// Panics if called from within the execution of a closure provided to another method on this
     /// value.
     pub fn entry<F, R>(&self, f: F) -> R
-        where F: FnOnce(Entry<T>) -> R
+    where
+        F: FnOnce(Entry<T>) -> R,
     {
         VALUES.with(|v| {
             let mut v = v.borrow_mut();
@@ -165,14 +162,16 @@ impl<T: 'static> ThreadLocal<T> {
     /// Panics if called from within the execution of a closure passed to `entry` or `get_mut` on
     /// this value.
     pub fn get<F, R>(&self, f: F) -> R
-        where F: FnOnce(Option<&T>) -> R
+    where
+        F: FnOnce(Option<&T>) -> R,
     {
         VALUES.with(|v| {
-                        let v = v.borrow();
-                        let value = v.get(&self.id)
-                            .map(|v| unsafe { v.downcast_ref_unchecked() });
-                        f(value)
-                    })
+            let v = v.borrow();
+            let value = v.get(&self.id).map(
+                |v| unsafe { v.downcast_ref_unchecked() },
+            );
+            f(value)
+        })
     }
 
     /// Passes a mutable reference to the current thread's value to a closure.
@@ -185,19 +184,22 @@ impl<T: 'static> ThreadLocal<T> {
     /// Panics if called from within the execution of a closure provided to another method on this
     /// value.
     pub fn get_mut<F, R>(&self, f: F) -> R
-        where F: FnOnce(Option<&mut T>) -> R
+    where
+        F: FnOnce(Option<&mut T>) -> R,
     {
         VALUES.with(|v| {
-                        let mut v = v.borrow_mut();
-                        let value = v.get_mut(&self.id)
-                            .map(|v| unsafe { v.downcast_mut_unchecked() });
-                        f(value)
-                    })
+            let mut v = v.borrow_mut();
+            let value = v.get_mut(&self.id).map(
+                |v| unsafe { v.downcast_mut_unchecked() },
+            );
+            f(value)
+        })
     }
 }
 
 impl<T> ThreadLocal<T>
-    where T: 'static + Clone
+where
+    T: 'static + Clone,
 {
     /// Returns a copy of the current thread's value.
     ///
@@ -207,10 +209,10 @@ impl<T> ThreadLocal<T>
     /// this value.
     pub fn get_cloned(&self) -> Option<T> {
         VALUES.with(|v| {
-                        v.borrow()
-                            .get(&self.id)
-                            .map(|v| unsafe { v.downcast_ref_unchecked::<T>().clone() })
-                    })
+            v.borrow().get(&self.id).map(|v| unsafe {
+                v.downcast_ref_unchecked::<T>().clone()
+            })
+        })
     }
 }
 
@@ -236,7 +238,8 @@ impl<'a, T: 'static> Entry<'a, T> {
     /// Ensures a value is in the entry by inserting the result of the default function if it is
     /// empty, and returns a mutable reference to the value in the entry.
     pub fn or_insert_with<F>(self, default: F) -> &'a mut T
-        where F: FnOnce() -> T
+    where
+        F: FnOnce() -> T,
     {
         match self {
             Entry::Occupied(e) => e.into_mut(),
@@ -246,14 +249,14 @@ impl<'a, T: 'static> Entry<'a, T> {
 }
 
 /// A view into a thread's slot in a `ThreadLocal` which is occupied.
-pub struct OccupiedEntry<'a, T: 'static>(hash_map::OccupiedEntry<'a, usize, Box<UnsafeAny>>,
-                                         PhantomData<&'a mut T>);
+pub struct OccupiedEntry<'a, T: 'static>(
+    hash_map::OccupiedEntry<'a, usize, Box<UnsafeAny>>,
+    PhantomData<&'a mut T>
+);
 
 impl<'a, T: 'static + fmt::Debug> fmt::Debug for OccupiedEntry<'a, T> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.debug_tuple("OccupiedEntry")
-            .field(self.get())
-            .finish()
+        fmt.debug_tuple("OccupiedEntry").field(self.get()).finish()
     }
 }
 
@@ -286,8 +289,10 @@ impl<'a, T: 'static> OccupiedEntry<'a, T> {
 }
 
 /// A view into a thread's slot in a `ThreadLocal` which is unoccupied.
-pub struct VacantEntry<'a, T: 'static>(hash_map::VacantEntry<'a, usize, Box<UnsafeAny>>,
-                                       PhantomData<&'a mut T>);
+pub struct VacantEntry<'a, T: 'static>(
+    hash_map::VacantEntry<'a, usize, Box<UnsafeAny>>,
+    PhantomData<&'a mut T>
+);
 
 impl<'a, T: 'static + fmt::Debug> fmt::Debug for VacantEntry<'a, T> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
