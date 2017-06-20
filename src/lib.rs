@@ -76,6 +76,9 @@ pub struct ThreadLocal<T: 'static> {
     _p: PhantomData<T>,
 }
 
+unsafe impl<T> Sync for ThreadLocal<T> {}
+unsafe impl<T> Send for ThreadLocal<T> {}
+
 impl<T: 'static + fmt::Debug> fmt::Debug for ThreadLocal<T> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.get(|v| {
